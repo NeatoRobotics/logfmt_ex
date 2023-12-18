@@ -26,3 +26,6 @@ logfmt_ex-*.tar
 /tmp/
 
 .DS_Store
+
+logfmt_ex.iml
+.idea

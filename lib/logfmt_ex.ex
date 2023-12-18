@@ -54,6 +54,7 @@ defmodule LogfmtEx do
   """
 
   alias LogfmtEx.Encoder
+  alias LogfmtEx.ValueEncoder
 
   @unix_epoch 62_167_219_200
 
@@ -170,7 +171,19 @@ defmodule LogfmtEx do
 
   defp encode(:metadata, _level, _message, _date_time, metadata, opts) do
     metadata
-    |> Enum.map(fn {key, value} -> Encoder.encode(key, value, opts) end)
+    |> Enum.map(fn {key, value} -> Encoder.encode(key, encode_metadata(value, []), opts) end)
     |> Enum.intersperse(" ")
+  end
+
+  defp encode_metadata([], acc) do
+    "[" <> Enum.join(acc, ", ") <> "]"
+  end
+
+  defp encode_metadata([value | values], acc) do
+    encode_metadata(values, [encode_metadata(value, []) | acc])
+  end
+
+  defp encode_metadata(value, []) do
+    ValueEncoder.encode(value)
   end
 end
