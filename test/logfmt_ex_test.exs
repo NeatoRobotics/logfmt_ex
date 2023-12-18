@@ -66,6 +66,42 @@ defmodule LogfmtExTest do
                inspect(pid) <> " reference=" <> inspect(ref) <> "\n"
   end
 
+  test "encodes complex metadata", %{time: time} do
+    ref = make_ref()
+    string = "a thing!"
+    pid = self()
+    inner_string = "inner_string"
+
+    assert format(
+             :huzzah,
+             "really thoughtful thoughts",
+             time,
+             [
+               bitstring: string,
+               atom: :atom,
+               integer: 1,
+               float: 1.2,
+               pid: pid,
+               reference: ref,
+               list: [5, 22, inner_string],
+               keyword: [a: 5, b: inner_string],
+               nested_list: [[1, 2, inner_string], [a: 2, b: 5]],
+               tuple: {1, 2, nil, inner_string},
+               map: %{a: [1, 2, 3], b: {5, inner_string}}
+             ],
+             format: [:metadata]
+           )
+           |> IO.iodata_to_binary() ==
+             "bitstring=\"a thing!\" atom=atom integer=1 float=1.2 pid=" <>
+               inspect(pid) <>
+               " reference=" <>
+               inspect(ref) <>
+               " list=\"[inner_string, 22, 5]\" keyword=\"[{:b, \\\"inner_string\\\"}, {:a, 5}]\"" <>
+               " nested_list=\"[[{:b, 5}, {:a, 2}], [inner_string, 2, 1]]\"" <>
+               " tuple=\"{1, 2, nil, \\\"inner_string\\\"}\" map=\"%{a: [1, 2, 3], b: {5, \\\"inner_string\\\"}}\"" <>
+               "\n"
+  end
+
   test "encodes node", %{time: time} do
     node = node()
 
