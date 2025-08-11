@@ -54,6 +54,7 @@ defmodule LogfmtEx do
   """
 
   alias LogfmtEx.Encoder
+  alias LogfmtEx.ValueEncoder
 
   @unix_epoch 62_167_219_200
 
@@ -83,12 +84,13 @@ defmodule LogfmtEx do
 
     * the log level: an atom (`t:atom/0`)
     * the message: this is usually `t:IO.chardata/0`
-    * the current timestamp: a term of type `t:Logger.Formatter.time/0`
+    * the current timestamp: a term of type `t:Logger.Formatter.date_time_ms/0`
     * the metadata: a keyword list (`t:keyword/0`)
 
   May optionally be passed a list of options that is merged into the Application environment.
   """
-  @spec format(Logger.level(), any(), Logger.Formatter.time(), Keyword.t()) :: IO.chardata()
+  @spec format(Logger.level(), any(), Logger.Formatter.date_time_ms(), Keyword.t()) ::
+          IO.chardata()
   def format(level, message, {date, time}, metadata, opts \\ []) do
     opts = :logfmt_ex |> Application.get_env(:opts, []) |> Keyword.merge(opts)
 
@@ -170,7 +172,19 @@ defmodule LogfmtEx do
 
   defp encode(:metadata, _level, _message, _date_time, metadata, opts) do
     metadata
-    |> Enum.map(fn {key, value} -> Encoder.encode(key, value, opts) end)
+    |> Enum.map(fn {key, value} -> Encoder.encode(key, encode_metadata(value, []), opts) end)
     |> Enum.intersperse(" ")
+  end
+
+  defp encode_metadata([], acc) do
+    "[" <> Enum.join(acc, ", ") <> "]"
+  end
+
+  defp encode_metadata([value | values], acc) do
+    encode_metadata(values, [encode_metadata(value, []) | acc])
+  end
+
+  defp encode_metadata(value, []) do
+    ValueEncoder.encode(value)
   end
 end
