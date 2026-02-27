@@ -25,7 +25,7 @@ defmodule LogfmtEx.MixProject do
 
   def cli do
     [
-      preferred_envs: [
+      preferred_cli_env: [
         coveralls: :test,
         "coveralls.detail": :test,
         "coveralls.post": :test,
