@@ -1,14 +1,14 @@
 defmodule LogfmtEx.MixProject do
   use Mix.Project
 
-  @version "0.4.2"
+  @version "0.5.1"
   @url "https://github.com/akasprzok/logfmt_ex"
 
   def project do
     [
       app: :logfmt_ex,
       version: @version,
-      elixir: "~> 1.18",
+      elixir: "~> 1.19",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
 
@@ -19,8 +19,13 @@ defmodule LogfmtEx.MixProject do
       docs: docs(),
 
       # Testing
-      test_coverage: [tool: ExCoveralls],
-      preferred_cli_env: [
+      test_coverage: [tool: ExCoveralls]
+    ]
+  end
+
+  def cli do
+    [
+      preferred_envs: [
         coveralls: :test,
         "coveralls.detail": :test,
         "coveralls.post": :test,
